@@ -1,59 +1,29 @@
-def hash(str, list_size):
-    #str to bytes
-    bytes_representation = str.encode()
+import sys
+import re
 
-    sum = 0
-    for byte in bytes_representation:
-        sum += byte
-    #return remainder of sum/list_size (or lhs if rhs is greater)
-    return sum % list_size
+class HashTableEntry:
+    def __init__(self):
+        pass
 
-#init list
-my_list = [None] * 5
+    def __str__(self):
+        return ""
 
-#setter
-my_list[hash("aqua", len(my_list))] = "#00FFFF"
-#getter
-print(my_list[hash("aqua", len(my_list))])
+class HashTable:
+    def __init__(self):
+        pass
 
+    def __str__(self):
+        return ""
 
-# my goal here is to make the function more dynamic by just passing the list in and letting
-# the function determine the length
-# this probably does a number on storage complexity though
-HASH_DATA_SIZE = 4
-hash_data = [None] * HASH_DATA_SIZE
+    def fnv1_64(self, string, seed=0):
+        FNV_prime = 1469511628211
+        offset_basis = 1469581039346656037
 
-def stretch_hash(str):
-    bytes_representation = str.encode()
+        hash = offset_basis + seed
+        for char in string:
+            hash = hash ^ ord(char)
+            hash = hash * FNV_prime
+        return hash
 
-    sum = 0
-    for byte in bytes_representation:
-        sum += byte
-        #restrict max number
-        #total &= 0xffffffff # 32 bit
-        total &= 0xffffffffffffffff #64 bit
-    #return remainder of sum/list_size (or lhs if rhs is greater)
-    return sum
-
-def get_index(s):
-    hash_value = stretch_hash(s)
-
-    return hash_value % HASH_DATA_SIZE
-
-def put(k, v):
-    index = get_index(k)
-    hash_data[index] = v
-
-def get(k):
-    index = get_index(k)
-    return hash_data[index]
-
-put("Kenny", "Hello, world!")
-put("nada", "nothing")
-put("another", "some")
-print(get("Kenny"))
-print(get("nada"))
-print(get("another"))
-
-
-# TODO:
+hashtbl = HashTable()
+print(hashtbl.fnv1_64("dog"))

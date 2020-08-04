@@ -265,6 +265,7 @@ class HashTable:
 
         Implement this.
         """
+        # I think this is causing the no_collisions test to fail because it's expecting None instead of the new head
         self.__hash_data[self.hash_index(key)].remove_head
         return self.hash_index(key)
 
@@ -288,7 +289,22 @@ class HashTable:
 
         Implement this.
         """
-        pass
+        old_capacity = self.capacity
+        self.capacity = new_capacity
+
+        additions = new_capacity - old_capacity
+        ll = LinkedList()
+        # FIXME: What if additions is negative (reducing the list size)?
+        for _ in range(additions):
+            self.__hash_data.append(copy(ll))
+        
+        hash_copy = copy(self.__hash_data)
+        #TODO: Refactor collisions in existing ll?        
+        for ll in hash_copy:
+            key = ll.head.key
+            if key != None:
+                new_index = self.hash_index(key)
+                self.__hash_data[new_index] = ll        
     
     def get_hash_data(self):
         return self.__hash_data
@@ -311,6 +327,7 @@ if __name__ == "__main__":
     ht.put("line_11", "So rested he by the Tumtum tree")
     ht.put("line_12", "And stood awhile in thought.")
 
+    # collisions are handled, but not properly (the other lines should be in the ll at that index)
     print(f'getting line_1:{ht.get("line_1")}')
     print(f'getting line_2:{ht.get("line_2")}')
 
@@ -319,11 +336,11 @@ if __name__ == "__main__":
     #     print(ht.get(f"line_{i}"))
 
     # # Test resizing
-    # old_capacity = ht.get_num_slots()
-    # ht.resize(ht.capacity * 2)
-    # new_capacity = ht.get_num_slots()
+    old_capacity = ht.get_num_slots()
+    ht.resize(ht.capacity * 2)
+    new_capacity = ht.get_num_slots()
 
-    # print(f"\nResized from {old_capacity} to {new_capacity}.\n")
+    print(f"\nResized from {old_capacity} to {new_capacity}.\n")
 
     # # Test if data intact after resizing
     # for i in range(1, 13):

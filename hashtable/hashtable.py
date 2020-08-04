@@ -201,6 +201,11 @@ class HashTable:
         """
         return len(self.__hash_data)
 
+    def total_items(self):
+        count = 0
+        for ll in self.__hash_data:
+            count += len(ll)
+        return count
 
     def get_load_factor(self):
         """
@@ -208,8 +213,7 @@ class HashTable:
 
         Implement this.
         """
-        pass
-
+        return self.total_items()/self.get_num_slots()
 
     def fnv1(self, key):
         """

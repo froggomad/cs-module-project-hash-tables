@@ -49,8 +49,8 @@ class LinkedList:
             self.tail = new_node
         else:
             #point new_node next to current head node (which points to the next and so on)
-            new_node.set_next(self.head)                         
-            #change head to the new_node since it points, the list continues
+            new_node.set_next(self.head)
+            #change head to new_node since it points, the list continues
             self.head = new_node
         self.size += 1
         return value
@@ -126,22 +126,38 @@ class LinkedList:
         self.tail = current
         self.size -= 1
         return val
-
-    def contains(self, value):
-        if not self.head:
-            return False
     
-        # get a reference to the node we're currently at; update this as we traverse the list
+    def delete(self, key):
+        if self.head.key == key:
+            return self.remove_head()
+
+        prev = self.head
+        cur = self.head.next
+
+        while cur is not None:
+            if cur.key == key:
+                prev.next = cur.next
+                return cur.value
+            #store the previous node for the next iteration
+            prev = prev.next
+            #set next for next iter
+            cur = cur.next
+        
+        return None     
+
+    def contains(self, key):
+        if not self.head:
+            return None
+
         current = self.head
-        # check to see if we're at a valid node 
-        while current:
-            # return True if the current value we're looking at matches our target value
-            if current.get_value() == value:
-                return True
-            # update our current node to the current node's next node
+        
+        while current:          
+            if current.key == key:
+                return current
+            
             current = current.get_next()
-        # if we've gotten here, then the target node isn't in our list
-        return False
+        # no match
+        return None
 
     def get_max(self):
         if not self.head:
@@ -168,7 +184,6 @@ class LinkedList:
 
     def __len__(self):
         return self.size
-
 
 class HashTable:
     """
@@ -228,7 +243,6 @@ class HashTable:
             hash = hash * FNV_prime
         return hash
 
-
     def djb2(self, key):
         """
         DJB2 hash, 32-bit
@@ -253,11 +267,24 @@ class HashTable:
         Hash collisions should be handled with Linked List Chaining.
 
         Implement this.
-        """
-        # TODO: Use LL to handle collisions?
+        """          
+        #if < 0.2 shrink by half capacity (stretch)
+        if self.get_load_factor() < 0.2:
+            #self.resize(self.capacity/2)
+            pass
+        #if > 0.7 double
+        elif self.get_load_factor() > 0.7:
+            self.resize(self.capacity*2)
+
+        # search ll for key
         index = self.hash_index(key)
-        self.__hash_data[index].add_to_head(key, value)
-        print(f"adding to {index}: {self.__hash_data[index].add_to_head(key, value)}")
+        node = self.__hash_data[index].contains(key)
+        # if key is there, overwrite
+        if node != None:
+            node.value = value
+        # if not, add to head
+        else:
+            self.__hash_data[index].add_to_head(key, value)
         return index
 
 
@@ -269,10 +296,12 @@ class HashTable:
 
         Implement this.
         """
-        # I think this is causing the no_collisions test to fail because it's expecting None instead of the new head
-        self.__hash_data[self.hash_index(key)].remove_head
-        return self.hash_index(key)
-
+        # TODO: Delete down the chain
+        # search ll at index
+        index = self.hash_index(key)
+        ll = self.__hash_data[index]
+        # return value from deleted entry or None if it failed
+        return ll.delete(key)
 
     def get(self, key):
         """
@@ -281,10 +310,12 @@ class HashTable:
         Returns None if the key is not found.
 
         Implement this.
-        """
-        if self.__hash_data[self.hash_index(key)].head.value != None:
-            return self.__hash_data[self.hash_index(key)].head.value
-
+        """        
+        # .contains() returns None if not found
+        node = self.__hash_data[self.hash_index(key)].contains(key)
+        if node:
+            return node.value
+        return None
 
     def resize(self, new_capacity):
         """
@@ -308,7 +339,10 @@ class HashTable:
             key = ll.head.key
             if key != None:
                 new_index = self.hash_index(key)
-                self.__hash_data[new_index] = ll        
+                self.__hash_data[new_index] = ll
+
+    def resize_by_load_factor(self):
+        pass
     
     def get_hash_data(self):
         return self.__hash_data

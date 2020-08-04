@@ -1,3 +1,5 @@
+from copy import copy
+
 class HashTableEntry:
     """
     Linked List hash table key/value pair
@@ -7,9 +9,165 @@ class HashTableEntry:
         self.value = value
         self.next = None
 
+    def __str__(self):
+        return f"{self.key}: {self.value}"
+    
+    def get_value(self):
+        return self.value
+    
+    def get_next(self):
+        return self.next
 
-# Hash table can't have fewer than this many slots
-MIN_CAPACITY = 8
+    def set_next(self, new_next):
+        self.next = new_next
+
+    def for_each(self, fn):
+        fn(self.value)
+        if self.next:
+            self.next.for_each(fn)
+
+class LinkedList:
+    def __init__(self, key=None, value=None):
+        node = HashTableEntry(key, value)
+        self.size = 0
+        self.head = node
+        self.tail = node
+
+    def __str__(self):
+        list = []
+        self.head.for_each(lambda x: list.append(x))        
+        return " ".join(str(x) for x in list)
+
+    def is_empty(self):
+        return self.size == 0
+
+    def add_to_head(self, key, value):
+        new_node = HashTableEntry(key, value)
+
+        if self.is_empty():
+            self.head = new_node            
+            self.tail = new_node
+        else:
+            #point new_node next to current head node (which points to the next and so on)
+            new_node.set_next(self.head)                         
+            #change head to the new_node since it points, the list continues
+            self.head = new_node
+        self.size += 1
+        return value
+
+    def add_to_tail(self, key, value):        
+        # 1. create the Node from the value 
+        new_node = HashTableEntry(key, value)
+        # So, what do we do if tail is None? 
+        # What's the rule we want to set to indicate that the linked
+        # list is empty? 
+        # Would it be better to check the head? 
+        # Let's check them both: an empty linked list has an empty 
+        # head and an empty tail 
+        if self.is_empty():
+            # in a one-element linked list, what should head and tail 
+            # be referring to? 
+            # have both head and tail referring to the single node 
+            self.head = new_node
+            # set the new node to be the tail 
+            self.tail = new_node        
+        else:
+            # These steps assume that the tail is already referring
+            # to a Node 
+            # 2. set the old tail's next to refer to the new Node 
+            self.tail.set_next(new_node)
+            # 3. reassign self.tail to refer to the new Node 
+            self.tail = new_node
+        self.size += 1
+
+    def remove_head(self):
+        # if we have an empty linked list 
+        if self.is_empty():
+            return
+        # what if we only have a single elem in the linked list?
+        # both head and tail are pointing at the same Node 
+        if not self.head.get_next():
+            head = self.head 
+            # delete the linked list's head reference 
+            self.head = None
+            # also delete the linked list's tail reference 
+            self.tail = None 
+            return head.get_value()
+        val = self.head.get_value()
+        # set self.head to the Node after the head 
+        self.head = self.head.get_next()
+        self.size -= 1
+        return val
+
+    def remove_tail(self):
+        # if we have an empty linked list 
+        if self.is_empty():
+            return
+        if self.tail == None:
+            val = self.head.value
+            self.remove_head()
+            return val
+        # if we have a non-empty linked list 
+        # we have to start at the head and move down the linked list 
+        # until we get to the node right before the tail 
+        # iterate over our linked list 
+        current = self.head
+
+        while current.get_next() and current.get_next() is not self.tail:
+            current = current.get_next()
+        # at this point, `current` is the node right before the tail
+        # store the value we're about to remove
+        val = self.tail.get_value()
+        # move self.tail to the Node right before
+        if current == self.head:
+            self.tail = None
+        current.set_next(None)
+        
+        self.tail = current
+        self.size -= 1
+        return val
+
+    def contains(self, value):
+        if not self.head:
+            return False
+    
+        # get a reference to the node we're currently at; update this as we traverse the list
+        current = self.head
+        # check to see if we're at a valid node 
+        while current:
+            # return True if the current value we're looking at matches our target value
+            if current.get_value() == value:
+                return True
+            # update our current node to the current node's next node
+            current = current.get_next()
+        # if we've gotten here, then the target node isn't in our list
+        return False
+
+    def get_max(self):
+        if not self.head:
+            return 0
+        
+        # reference to the largest value we've seen so far
+        max_value = self.head.get_value()
+        # reference to our current node as we traverse the list
+        current = self.head.get_next()
+        # track count        
+        #i = 1
+        # check to see if we're still at a valid list node        
+        while current:
+            #i += 1
+            # check to see if the current value is greater than the max_value
+            if current.get_value() > max_value:
+                # if so, update our max_value variable
+                max_value = current.get_value()            
+                
+            # update the current node to the next node in the list            
+            current = current.get_next()
+        #return max_value
+        return max_value
+
+    def __len__(self):
+        return self.size
 
 
 class HashTable:
@@ -20,8 +178,15 @@ class HashTable:
     Implement this.
     """
 
-    def __init__(self, capacity):
-        # Your code here
+    def __init__(self, capacity, value=None):
+        self.capacity = capacity
+        ll = LinkedList()
+        self.__hash_data = [copy(ll) for l in range(capacity)]
+        print(self.__hash_data)
+
+    def __str__(self):
+        string = " ".join(l.head.value for l in self.__hash_data)
+        return string
 
 
     def get_num_slots(self):
@@ -34,7 +199,7 @@ class HashTable:
 
         Implement this.
         """
-        # Your code here
+        return len(self.__hash_data)
 
 
     def get_load_factor(self):
@@ -43,17 +208,21 @@ class HashTable:
 
         Implement this.
         """
-        # Your code here
+        pass
 
 
     def fnv1(self, key):
         """
         FNV-1 Hash, 64-bit
-
-        Implement this, and/or DJB2.
         """
+        FNV_prime = 1469511628211
+        offset_basis = 1469581039346656037
 
-        # Your code here
+        hash = offset_basis
+        for char in key:
+            hash = hash ^ ord(char)
+            hash = hash * FNV_prime
+        return hash
 
 
     def djb2(self, key):
@@ -62,7 +231,7 @@ class HashTable:
 
         Implement this, and/or FNV-1.
         """
-        # Your code here
+        pass
 
 
     def hash_index(self, key):
@@ -70,8 +239,8 @@ class HashTable:
         Take an arbitrary key and return a valid integer index
         between within the storage capacity of the hash table.
         """
-        #return self.fnv1(key) % self.capacity
-        return self.djb2(key) % self.capacity
+        return self.fnv1(key) % self.capacity
+        #return self.djb2(key) % self.capacity
 
     def put(self, key, value):
         """
@@ -81,7 +250,11 @@ class HashTable:
 
         Implement this.
         """
-        # Your code here
+        # TODO: Use LL to handle collisions?
+        index = self.hash_index(key)
+        self.__hash_data[index].add_to_head(key, value)
+        print(f"adding to {index}: {self.__hash_data[index].add_to_head(key, value)}")
+        return index
 
 
     def delete(self, key):
@@ -92,7 +265,8 @@ class HashTable:
 
         Implement this.
         """
-        # Your code here
+        self.__hash_data[self.hash_index(key)].remove_head
+        return self.hash_index(key)
 
 
     def get(self, key):
@@ -103,7 +277,8 @@ class HashTable:
 
         Implement this.
         """
-        # Your code here
+        if self.__hash_data[self.hash_index(key)].head.value != None:
+            return self.__hash_data[self.hash_index(key)].head.value
 
 
     def resize(self, new_capacity):
@@ -113,11 +288,14 @@ class HashTable:
 
         Implement this.
         """
-        # Your code here
-
+        pass
+    
+    def get_hash_data(self):
+        return self.__hash_data
 
 
 if __name__ == "__main__":
+
     ht = HashTable(8)
 
     ht.put("line_1", "'Twas brillig, and the slithy toves")
@@ -133,21 +311,22 @@ if __name__ == "__main__":
     ht.put("line_11", "So rested he by the Tumtum tree")
     ht.put("line_12", "And stood awhile in thought.")
 
-    print("")
+    print(f'getting line_1:{ht.get("line_1")}')
+    print(f'getting line_2:{ht.get("line_2")}')
 
-    # Test storing beyond capacity
-    for i in range(1, 13):
-        print(ht.get(f"line_{i}"))
+    # # Test storing beyond capacity
+    # for i in range(1, 13):
+    #     print(ht.get(f"line_{i}"))
 
-    # Test resizing
-    old_capacity = ht.get_num_slots()
-    ht.resize(ht.capacity * 2)
-    new_capacity = ht.get_num_slots()
+    # # Test resizing
+    # old_capacity = ht.get_num_slots()
+    # ht.resize(ht.capacity * 2)
+    # new_capacity = ht.get_num_slots()
 
-    print(f"\nResized from {old_capacity} to {new_capacity}.\n")
+    # print(f"\nResized from {old_capacity} to {new_capacity}.\n")
 
-    # Test if data intact after resizing
-    for i in range(1, 13):
-        print(ht.get(f"line_{i}"))
+    # # Test if data intact after resizing
+    # for i in range(1, 13):
+    #     print(ht.get(f"line_{i}"))
 
-    print("")
+    # print("")

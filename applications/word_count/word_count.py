@@ -3,19 +3,19 @@ def word_count(s):
     phrase = ""
 
     chars_to_ignore = '":;,.-+=/\\|[]{}()*^&'
-    
+    # add characters to phrase
     for char in s:
         if char not in chars_to_ignore:
             phrase += char
-
+    # split phrase into words
     words = phrase.lower().split()
 
     # count each word
-    for i in range(len(words)):        
-        if words[i] not in d:            
-            d[words[i]] = 1
+    for word in words:        
+        if word not in d:            
+            d[word] = 1
         else:
-            d[words[i]] += 1
+            d[word] += 1
 
     return d
 

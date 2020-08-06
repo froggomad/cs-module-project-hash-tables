@@ -15,7 +15,7 @@ def f(x):
 
 """
 for n in q:
-    sum each pair, store in dict (ie 1+3 == d[(0,1)] = 4)
+    sum each pair, store in dict (ie 1+3 = 4 == d[(0,1)] = 4)
 
 for n in q:
     diff each pair, return if match, or return None
@@ -26,22 +26,15 @@ def find_matches(l):
     e = {}
     # TODO: Efficiency
     # get the index and value of each node in q and add/subtract, storing in separate dictionaries with keys as tuples of keys and value as value
-    for i, n in enumerate(l):
-        for j, o in enumerate(l):        
-            key = i
-            next_key = j
-            
-            next_key = j
-            next_value = o
+    for key, value in enumerate(l):
+        for next_key, next_value in enumerate(l):            
             # subtract no matter what
-            e[(key, next_key)] = n - next_value
+            e[(key, next_key)] = value - next_value
             # addition will have the same result with inverse keys, so avoid extra work
-            if next_key != None:
-                if (next_key, key) not in d.keys():
-                    d[(key, next_key)] = n + next_value               
+            if (next_key, key) not in d.keys():
+                d[(key, next_key)] = value + next_value
 
-            #print(d)
-            #what I find really interesting here is what I expect to be the value at each position is actually the key. If I do k, v in d, I get the index and key where I would expect the key and value
+    #what I find really interesting here is what I expect to be the value at each position is actually the key. If I do k, v in d, I get the index and key where I would expect the key and value
     for v in d:
         for v2 in e:
             if d[v] == e[v2]:

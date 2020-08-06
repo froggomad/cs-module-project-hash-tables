@@ -334,19 +334,19 @@ class HashTable:
             self.__hash_data.append(copy(ll))
         
         hash_copy = copy(self.__hash_data)
-        #TODO: Refactor collisions in existing ll?        
-        for ll in hash_copy:
-            key = ll.head.key
-            if key != None:
-                new_index = self.hash_index(key)
-                self.__hash_data[new_index] = ll
 
-    def resize_by_load_factor(self):
-        pass
+        for ll in hash_copy:
+            node = ll.head
+            while node:
+                key = node.key                
+                if key != None:
+                    new_index = self.hash_index(key)
+                    #ll = LinkedList(node.key, node.value)
+                    self.__hash_data[new_index] = ll
+                node = node.next
     
     def get_hash_data(self):
         return self.__hash_data
-
 
 if __name__ == "__main__":
 
@@ -365,13 +365,9 @@ if __name__ == "__main__":
     ht.put("line_11", "So rested he by the Tumtum tree")
     ht.put("line_12", "And stood awhile in thought.")
 
-    # collisions are handled, but not properly (the other lines should be in the ll at that index)
-    print(f'getting line_1:{ht.get("line_1")}')
-    print(f'getting line_2:{ht.get("line_2")}')
-
     # # Test storing beyond capacity
-    # for i in range(1, 13):
-    #     print(ht.get(f"line_{i}"))
+    for i in range(1, 13):
+        print(ht.get(f"line_{i}"))
 
     # # Test resizing
     old_capacity = ht.get_num_slots()
@@ -380,8 +376,8 @@ if __name__ == "__main__":
 
     print(f"\nResized from {old_capacity} to {new_capacity}.\n")
 
-    # # Test if data intact after resizing
-    # for i in range(1, 13):
-    #     print(ht.get(f"line_{i}"))
+    # Test if data intact after resizing
+    for i in range(1, 13):
+        print(ht.get(f"line_{i}"))
 
-    # print("")
+    print("")

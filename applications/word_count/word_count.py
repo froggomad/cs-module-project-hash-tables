@@ -13,7 +13,7 @@ def word_count(s):
     # count each word
     for i in range(len(words)):        
         if words[i] not in d:            
-            d[words[i]] = 0
+            d[words[i]] = 1
         else:
             d[words[i]] += 1
 
@@ -23,6 +23,6 @@ def word_count(s):
 
 if __name__ == "__main__":
     print(word_count(""))
-    print(word_count("Hello"))
+    print(word_count("Hello   hello"))
     print(word_count('Hello, my cat. And my cat doesn\'t say "hello" back.'))
     print(word_count('This is a test of the emergency broadcast network. This is only a test.'))
